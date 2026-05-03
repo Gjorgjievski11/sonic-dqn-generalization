@@ -1,0 +1,62 @@
+services:
+
+  train-cpu:
+    build:
+      context: .
+      target: cpu
+    image: sonic-dqn:cpu
+    volumes:
+      - ./roms:/app/roms
+      - ./runs:/app/runs
+      - ./configs:/app/configs
+      - ./src:/app/src
+      - ./train.py:/app/train.py
+      - ./evaluate.py:/app/evaluate.py
+      - retro-data:/app/.venv/lib/python3.11/site-packages/stable_retro/data
+    command: python train.py --config configs/dqn_sonic.yaml
+
+  # Requires: sudo pacman -S nvidia-container-toolkit && sudo systemctl restart docker
+  train-gpu:
+    build:
+      context: .
+      target: gpu
+    image: sonic-dqn:gpu
+    volumes:
+      - ./roms:/app/roms
+      - ./runs:/app/runs
+      - ./configs:/app/configs
+      - ./src:/app/src
+      - ./train.py:/app/train.py
+      - ./evaluate.py:/app/evaluate.py
+      - retro-data:/app/.venv/lib/python3.11/site-packages/stable_retro/data
+    command: python train.py --config configs/dqn_sonic.yaml
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  evaluate:
+    image: sonic-dqn:cpu
+    volumes:
+      - ./roms:/app/roms
+      - ./runs:/app/runs
+      - ./configs:/app/configs
+      - ./src:/app/src
+      - ./train.py:/app/train.py
+      - ./evaluate.py:/app/evaluate.py
+      - retro-data:/app/.venv/lib/python3.11/site-packages/stable_retro/data
+    command: python evaluate.py --config configs/dqn_sonic.yaml
+
+  tensorboard:
+    image: sonic-dqn:cpu
+    volumes:
+      - ./runs:/app/runs:ro
+    ports:
+      - "6006:6006"
+    command: tensorboard --logdir runs/ --host 0.0.0.0 --port 6006
+
+volumes:
+  retro-data:

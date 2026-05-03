@@ -1,0 +1,61 @@
+[project]
+name = "sonic-dqn-generalization"
+version = "0.1.0"
+description = "Measuring Generalization of DQN Agents across zones in Sonic the Hedgehog"
+requires-python = ">=3.11,<3.13"
+
+# Core dependencies — no PyTorch here, see extras below
+dependencies = [
+    "gymnasium>=0.29.1",
+    "stable-retro>=0.9.2",
+    "numpy>=1.26.4",
+    "pyyaml>=6.0.1",
+    "opencv-python-headless>=4.9.0.80",
+    "tqdm>=4.66.4",
+    "tensorboard>=2.17.0",
+    "setuptools>=69.0,<81",
+]
+
+# ──────────────────────────────────────────────────────────────
+#  Install EXACTLY ONE of these extras:
+#
+#  No NVIDIA GPU (Windows / Mac / Linux without CUDA):
+#    uv sync --extra cpu
+#
+#  NVIDIA GPU with CUDA 12.1 (Linux, auto-selected by `make install`):
+#    uv sync --extra gpudocker compose run --rm train-cpu /app/.venv/bin/python -c "import pkg_resources; print('ok')"
+# ──────────────────────────────────────────────────────────────
+[project.optional-dependencies]
+cpu = [
+    "torch==2.3.1+cpu",
+    "torchvision==0.18.1+cpu",
+]
+gpu = [
+    "torch==2.3.1+cu121",
+    "torchvision==0.18.1+cu121",
+]
+
+# Declare cpu and gpu as mutually exclusive so uv generates a correct
+# lockfile covering both configurations independently.
+[tool.uv]
+conflicts = [
+    [{ extra = "cpu" }, { extra = "gpu" }],
+]
+
+# Single PyTorch index that hosts ALL variants (+cpu, +cu121, etc.)
+# One index avoids "conflicting indexes" errors from uv.
+[[tool.uv.index]]
+name = "pytorch-whl"
+url = "https://download.pytorch.org/whl"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-whl" }
+torchvision = { index = "pytorch-whl" }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sonic_dqn"]

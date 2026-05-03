@@ -1,0 +1,20 @@
+# Training outputs
+runs/
+
+# ROMs
+roms/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.ruff_cache/
+
+# PyCharm
+.idea/
+
+# uv
+.python-version
+uv.lock
