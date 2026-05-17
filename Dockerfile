@@ -5,11 +5,12 @@ FROM python:3.11-slim-bookworm AS cpu
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        build-essential \
-        cmake \
-        libsdl2-dev \
-        libgl1 \
-        libglib2.0-0 \
+    ffmpeg \
+    build-essential \
+    cmake \
+    libsdl2-dev \
+    libgl1 \
+    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
@@ -36,14 +37,15 @@ FROM nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04 AS gpu
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        python3.11 \
-        python3.11-dev \
-        python3-pip \
-        build-essential \
-        cmake \
-        libsdl2-dev \
-        libgl1 \
-        libglib2.0-0 \
+    ffmpeg \
+    python3.11 \
+    python3.11-dev \
+    python3-pip \
+    build-essential \
+    cmake \
+    libsdl2-dev \
+    libgl1 \
+    libglib2.0-0 \
     && ln -sf /usr/bin/python3.11 /usr/bin/python \
     && ln -sf /usr/bin/python3.11 /usr/bin/python3 \
     && rm -rf /var/lib/apt/lists/*

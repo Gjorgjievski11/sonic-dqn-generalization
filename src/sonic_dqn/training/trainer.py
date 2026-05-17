@@ -1,9 +1,10 @@
 import os
 import time
 import numpy as np
+import wandb
+
 import torch
 import torch.nn.functional as F
-from torch.utils.tensorboard import SummaryWriter
 
 from sonic_dqn.envs.sonic_env import SonicEnv
 from sonic_dqn.agents.dqn import DQN, ReplayBuffer
@@ -18,7 +19,6 @@ def train(cfg: dict) -> None:
     os.makedirs(log_cfg["checkpoint_dir"], exist_ok=True)
     os.makedirs(log_cfg["tensorboard_dir"], exist_ok=True)
 
-    writer = SummaryWriter(log_dir=log_cfg["tensorboard_dir"])
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"\n{'='*50}")
     print(f"  Experiment : {cfg['experiment']['name']}")
@@ -78,9 +78,13 @@ def train(cfg: dict) -> None:
             episode_rewards.append(episode_reward)
             avg10 = np.mean(episode_rewards[-10:])
 
-            writer.add_scalar("episode/reward", episode_reward, step)
-            writer.add_scalar("episode/length", episode_steps, step)
-            writer.add_scalar("episode/epsilon", epsilon, step)
+            wandb.log({
+                "episode/reward": episode_reward,
+                "episode/length": episode_steps,
+                "episode/epsilon": epsilon,
+                "episode/avg_10_reward": avg10
+            }, step=step)
+
 
             obs, _ = env.reset()
             episode_reward = 0.0
@@ -107,8 +111,10 @@ def train(cfg: dict) -> None:
             torch.nn.utils.clip_grad_norm_(policy_net.parameters(), 10.0)
             optimizer.step()
 
-            writer.add_scalar("train/loss", loss.item(), step)
-            writer.add_scalar("train/q_mean", q_vals.mean().item(), step)
+            wandb.log({
+                "train/loss": loss.item(),
+                "train/q_mean": q_vals.mean().item()
+            }, step=step)
 
         # Update target network
         if step % tr["target_update_freq"] == 0:
@@ -147,4 +153,3 @@ def train(cfg: dict) -> None:
     print(f"{'='*50}\n")
 
     env.close()
-    writer.close()

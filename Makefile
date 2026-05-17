@@ -13,7 +13,6 @@ help:
 	@echo "  make train-cpu      train on CPU"
 	@echo "  make train-gpu      train on GPU"
 	@echo "  make evaluate       evaluate latest checkpoint"
-	@echo "  make tensorboard    open TensorBoard at :6006"
 	@echo ""
 
 .PHONY: build-cpu
@@ -40,6 +39,4 @@ train-gpu:
 evaluate:
 	docker compose run --rm evaluate
 
-.PHONY: tensorboard
-tensorboard:
-	docker compose up tensorboard
+

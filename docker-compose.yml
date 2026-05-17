@@ -5,6 +5,8 @@ services:
       context: .
       target: cpu
     image: sonic-dqn:cpu
+    environment:
+      - WANDB_API_KEY=${WANDB_API_KEY} # Allows WandB to authenticate
     volumes:
       - ./roms:/app/roms
       - ./runs:/app/runs
@@ -21,6 +23,8 @@ services:
       context: .
       target: gpu
     image: sonic-dqn:gpu
+    environment:
+      - WANDB_API_KEY=${WANDB_API_KEY} # Allows WandB to authenticate
     volumes:
       - ./roms:/app/roms
       - ./runs:/app/runs
@@ -49,14 +53,6 @@ services:
       - ./evaluate.py:/app/evaluate.py
       - retro-data:/app/.venv/lib/python3.11/site-packages/stable_retro/data
     command: python evaluate.py --config configs/dqn_sonic.yaml
-
-  tensorboard:
-    image: sonic-dqn:cpu
-    volumes:
-      - ./runs:/app/runs:ro
-    ports:
-      - "6006:6006"
-    command: tensorboard --logdir runs/ --host 0.0.0.0 --port 6006
 
 volumes:
   retro-data:
